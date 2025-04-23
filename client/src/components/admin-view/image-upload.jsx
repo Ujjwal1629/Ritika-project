@@ -46,17 +46,34 @@ function ProductImageUpload({
   }
 
   async function uploadImageToCloudinary() {
-    setImageLoadingState(true);
-    const data = new FormData();
-    data.append("my_file", imageFile);
-    const response = await axios.post(
-      "http://localhost:5000/api/admin/products/upload-image",
-      data
-    );
-    console.log(response, "response");
+    try {
+      setImageLoadingState(true);
+      const data = new FormData();
+      data.append("my_file", imageFile);
+      
+      console.log('Uploading file:', imageFile); // Log the file being uploaded
+      
+      const response = await axios.post(
+        "http://localhost:5000/api/admin/products/upload-image",
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      
+      console.log('Upload response:', response.data); // Log the response
 
-    if (response?.data?.success) {
-      setUploadedImageUrl(response.data.result.url);
+      if (response?.data?.success) {
+        setUploadedImageUrl(response.data.result.url);
+        setImageLoadingState(false);
+      } else {
+        console.error('Upload failed:', response.data);
+        setImageLoadingState(false);
+      }
+    } catch (error) {
+      console.error('Upload error:', error.response?.data || error.message);
       setImageLoadingState(false);
     }
   }

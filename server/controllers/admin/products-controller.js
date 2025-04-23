@@ -1,21 +1,49 @@
 const { imageUploadUtil } = require("../../helpers/cloudinary");
 const Product = require("../../models/Product");
+const cloudinary = require("cloudinary");
 
 const handleImageUpload = async (req, res) => {
   try {
+    console.log('File received:', req.file); // Log the received file
+    
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded"
+      });
+    }
+
+    // Verify file type
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedMimes.includes(req.file.mimetype)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid file type. Only JPG, PNG and GIF are allowed"
+      });
+    }
+
     const b64 = Buffer.from(req.file.buffer).toString("base64");
     const url = "data:" + req.file.mimetype + ";base64," + b64;
+    
+    console.log('Attempting to upload to Cloudinary...'); // Log before upload
+    console.log('Cloudinary Config:', {
+      cloud_name: cloudinary.config().cloud_name,
+      api_key_set: !!cloudinary.config().api_key,
+      api_secret_set: !!cloudinary.config().api_secret
+    });
+
     const result = await imageUploadUtil(url);
+    console.log('Cloudinary upload result:', result); // Log the result
 
     res.json({
       success: true,
       result,
     });
   } catch (error) {
-    console.log(error);
-    res.json({
+    console.error('Detailed error:', error); // Log the full error
+    res.status(500).json({
       success: false,
-      message: "Error occured",
+      message: error.message || "Error occurred during image upload"
     });
   }
 };

@@ -30,6 +30,7 @@ import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import { useToast } from "@/components/ui/use-toast";
 import ProductDetailsDialog from "@/components/shopping-view/product-details";
 import { getFeatureImages } from "@/store/common-slice";
+import { placeholderImages } from "@/utils/placeholder-images";
 
 const categoriesWithIcon = [
   { id: "men", label: "Men", icon: ShirtIcon },
@@ -123,17 +124,18 @@ function ShoppingHome() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="relative w-full h-[600px] overflow-hidden">
-        {featureImageList && featureImageList.length > 0
-          ? featureImageList.map((slide, index) => (
-              <img
-                src={slide?.image}
-                key={index}
-                className={`${
-                  index === currentSlide ? "opacity-100" : "opacity-0"
-                } absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000`}
-              />
-            ))
-          : null}
+        {(featureImageList && featureImageList.length > 0 
+          ? featureImageList 
+          : placeholderImages.banner).map((slide, index) => (
+          <img
+            src={typeof slide === 'string' ? slide : slide?.image}
+            key={index}
+            alt={`Feature Slide ${index + 1}`}
+            className={`${
+              index === currentSlide ? "opacity-100" : "opacity-0"
+            } absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000`}
+          />
+        ))}
         <Button
           variant="outline"
           size="icon"
